@@ -18,6 +18,37 @@ func Arrange(repeat int, operations [][]int) []int {
 	return ball
 }
 
+func ArrangeOpmized(repeat int, operations [][]int) []int {
+	var balls = []int{1, 2, 3, 4, 5, 6, 7, 8}
+	indexes := indexSet(operations)
+	result := []int{1, 2, 3, 4, 5, 6, 7, 8}
+	for c := 0; c < repeat; c++ {
+		for i, ball := range balls {
+			next := indexes[i]
+			result[next] = ball
+		}
+		copy(balls, result)
+	}
+	return balls
+}
+func indexSet(operations [][]int) []int {
+	var balls = []int{1, 2, 3, 4, 5, 6, 7, 8}
+	var indexes = []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+	for _, operation := range operations {
+		A := operation[0]
+		B := operation[1]
+		A--
+		B--
+		balls[A], balls[B] = balls[B], balls[A]
+	}
+	for i, ball := range balls {
+		indexes[ball-1] = i
+	}
+
+	return indexes
+}
+
 func main() {
 
 	K := 0
@@ -44,7 +75,7 @@ func main() {
 		K = 1000000000
 		operations := [][]int{{1, 3}, {6, 8}, {3, 5}, {2, 6}, {3, 7}, {3, 4}, {4, 7}, {2, 4}, {1, 3}, {2, 7}, {2, 7}, {2, 4}, {6, 7}, {1, 7}, {3, 4}, {1, 6}}
 	*/
-	result := Arrange(K, operations)
+	result := ArrangeOpmized(K, operations)
 	fmt.Printf("%v", result)
 	// result 1, 8, 3, 4, 5, 2, 7, 6
 
