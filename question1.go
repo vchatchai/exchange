@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func Arrange(repeat int, operations [][]int) []int {
 
@@ -31,6 +33,48 @@ func ArrangeOpmized(repeat int, operations [][]int) []int {
 	}
 	return balls
 }
+
+func ArrangeGORoutine(repeat int, operations [][]int) []int {
+	var balls = []int{1, 2, 3, 4, 5, 6, 7, 8}
+	indexes := indexSet(operations)
+	result := []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+	input := make(chan []int, 8)
+	output := make(chan []int, 8)
+
+	for c := 0; c < 8; c++ {
+		go routine(repeat, indexes, input, output)
+	}
+
+	for i, ball := range balls {
+		values := []int{i, ball}
+		input <- values
+	}
+	count := 0
+	for values := range output {
+		result[values[0]] = values[1]
+		count++
+		if count == 8 {
+			close(input)
+			close(output)
+		}
+	}
+
+	return result
+}
+
+func routine(repeat int, indexes []int, input <-chan []int, output chan<- []int) {
+	for values := range input {
+		i := values[0]
+		ball := values[1]
+		for c := 0; c < repeat; c++ {
+			i = indexes[i]
+		}
+		output <- []int{i, ball}
+	}
+
+}
+
 func indexSet(operations [][]int) []int {
 	var balls = []int{1, 2, 3, 4, 5, 6, 7, 8}
 	var indexes = []int{1, 2, 3, 4, 5, 6, 7, 8}
@@ -75,7 +119,7 @@ func main() {
 		K = 1000000000
 		operations := [][]int{{1, 3}, {6, 8}, {3, 5}, {2, 6}, {3, 7}, {3, 4}, {4, 7}, {2, 4}, {1, 3}, {2, 7}, {2, 7}, {2, 4}, {6, 7}, {1, 7}, {3, 4}, {1, 6}}
 	*/
-	result := ArrangeOpmized(K, operations)
+	result := ArrangeGORoutine(K, operations)
 	fmt.Printf("%v", result)
 	// result 1, 8, 3, 4, 5, 2, 7, 6
 
